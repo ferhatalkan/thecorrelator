@@ -19,6 +19,30 @@ A high-performance CLI tool for computing pairwise column correlations from tabu
 
 ## Build
 
+### CMake (recommended)
+
+```bash
+cmake -B build
+cmake --build build
+# binary is at build/correlate
+```
+
+To set the number of parallel compile jobs:
+
+```bash
+cmake --build build --parallel 4
+```
+
+To install to a custom prefix:
+
+```bash
+cmake -B build -DCMAKE_INSTALL_PREFIX=/usr/local
+cmake --build build
+cmake --install build
+```
+
+### Manual (g++)
+
 ```bash
 g++ -o correlate correlator_parallel.cpp -std=c++11 -lz -fopenmp -lgsl -lgslcblas
 ```
