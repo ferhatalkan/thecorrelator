@@ -317,21 +317,13 @@ void mode1(const string& filename, const string& outputFile = "", int numThreads
     // Process in parallel, but write sequentially to avoid corruption
     #pragma omp parallel for schedule(dynamic) ordered
     for (long long idx = 0; idx < totalPairs; idx++) {
-        // Convert linear index to (i, j) pair
-        int i = 0, j = 0;
-        long long count = 0;
-        bool found = false;
-
-        for (int ii = 0; ii < nCols && !found; ii++) {
-            for (int jj = ii + 1; jj < nCols && !found; jj++) {
-                if (count == idx) {
-                    i = ii;
-                    j = jj;
-                    found = true;
-                }
-                count++;
-            }
-        }
+        // Convert linear index to (i, j) pair in O(1) via closed-form triangular inversion.
+        // Total pairs before row i = i*(2*nCols - i - 1)/2, so solving for i gives:
+        int i = (int)((2.0*nCols - 1.0 - sqrt((2.0*nCols - 1.0)*(2.0*nCols - 1.0) - 8.0*idx)) / 2.0);
+        // Correct for potential floating-point rounding
+        if ((long long)(i + 1) * (2 * nCols - i - 2) / 2 <= idx) i++;
+        long long pairs_before_i = (long long)i * (2 * nCols - i - 1) / 2;
+        int j = (int)(idx - pairs_before_i + i + 1);
 
         vector<double> col1 = getColumn(csv.data, i);
         vector<double> col2 = getColumn(csv.data, j);
